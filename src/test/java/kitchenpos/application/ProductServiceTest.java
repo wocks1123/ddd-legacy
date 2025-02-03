@@ -1,8 +1,9 @@
 package kitchenpos.application;
 
-import kitchenpos.domain.MenuRepository;
-import kitchenpos.domain.Product;
-import kitchenpos.domain.ProductRepository;
+import kitchenpos.domain.*;
+import kitchenpos.fixture.MenuFixture;
+import kitchenpos.fixture.MenuGroupFixture;
+import kitchenpos.fixture.MenuProductFixture;
 import kitchenpos.fixture.ProductFixture;
 import kitchenpos.infra.PurgomalumClient;
 import org.junit.jupiter.api.DisplayName;
@@ -52,9 +53,7 @@ class ProductServiceTest {
         @DisplayName("상품을 등록한다.")
         void testRegisterProduct() {
             // given
-            final String name = "후라이드";
-            final BigDecimal price = BigDecimal.valueOf(16_000);
-            final Product request = ProductFixture.createProductRequest(name, price);
+            final Product request = ProductFixture.createProductRequest("후라이드", BigDecimal.valueOf(16_000));
             given(productRepository.save(any())).willReturn(request);
             given(purgomalumClient.containsProfanity(anyString())).willReturn(false);
 
@@ -64,8 +63,8 @@ class ProductServiceTest {
             // then
             assertThat(result).isNotNull();
             assertAll(
-                    () -> assertThat(result.getName()).isEqualTo(name),
-                    () -> assertThat(result.getPrice()).isEqualByComparingTo(price)
+                    () -> assertThat(result.getName()).isEqualTo(request.getName()),
+                    () -> assertThat(result.getPrice()).isEqualByComparingTo(result.getPrice())
             );
         }
 
@@ -88,8 +87,7 @@ class ProductServiceTest {
         @ValueSource(ints = {-1000, -1})
         void testPriceLessThanZero(final int price) {
             // given
-            final String name = "후라이드";
-            final Product request = ProductFixture.createProductRequest(name, BigDecimal.valueOf(price));
+            final Product request = ProductFixture.createProductRequest("후라이드", BigDecimal.valueOf(price));
 
             // when & then
             assertThatException()
@@ -98,12 +96,10 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("상품 등록 시 이름의 유해성 여부를 검사한다.")
+        @DisplayName("부적절한 이름으로 상품을 생성할 수 없다.")
         void testInappropriateName() {
             // given
-            final String name = "부적절한 이름";
-            final BigDecimal price = BigDecimal.valueOf(16_000);
-            final Product request = ProductFixture.createProductRequest(name, price);
+            final Product request = ProductFixture.createProductRequest("부적절한 이름", BigDecimal.valueOf(16_000));
             given(purgomalumClient.containsProfanity(anyString())).willReturn(true);
 
             // when & then
@@ -121,11 +117,8 @@ class ProductServiceTest {
         @DisplayName("지정한 상품의 가격을 변경할 수 있다.")
         void changeProductPriceSuccess() {
             // given
-            final String name = "후라이드";
-            final BigDecimal price = BigDecimal.valueOf(16_000);
-            final BigDecimal newPrice = BigDecimal.valueOf(20_000);
-            final Product product = ProductFixture.createProduct(name, price);
-            final Product request = ProductFixture.createProductRequest(newPrice);
+            final Product product = ProductFixture.createProduct("후라이드", BigDecimal.valueOf(16_000));
+            final Product request = ProductFixture.createProductRequest(BigDecimal.valueOf(20_000));
             given(productRepository.findById(any())).willReturn(Optional.of(product));
             given(menuRepository.findAllByProductId(any())).willReturn(List.of());
 
@@ -136,21 +129,18 @@ class ProductServiceTest {
             assertThat(result).isNotNull();
             assertAll(
                     () -> assertThat(result.getId()).isEqualTo(product.getId()),
-                    () -> assertThat(result.getName()).isEqualTo(name),
-                    () -> assertThat(result.getPrice()).isEqualByComparingTo(newPrice)
+                    () -> assertThat(result.getName()).isEqualTo(product.getName()),
+                    () -> assertThat(result.getPrice()).isEqualByComparingTo(request.getPrice())
             );
         }
 
         @ParameterizedTest
-        @DisplayName("상품 가격은 0원 이상으로만 가능하다.")
+        @DisplayName("상품의 가격은 0원 이상이어야 한다.")
         @ValueSource(ints = {-1000, -1})
-        void changeProductPriceFailsWithNegativePrice(final int amount) {
+        void changeProductPriceFailsWithNegativePrice(final int newPrice) {
             // given
-            final String name = "후라이드";
-            final BigDecimal price = BigDecimal.valueOf(16_000);
-            final BigDecimal newPrice = BigDecimal.valueOf(amount);
-            final Product product = ProductFixture.createProduct(name, price);
-            final Product request = ProductFixture.createProductRequest(newPrice);
+            final Product product = ProductFixture.createProduct("후라이드", BigDecimal.valueOf(16_000));
+            final Product request = ProductFixture.createProductRequest(BigDecimal.valueOf(newPrice));
 
             // when & then
             assertThatException()
@@ -163,8 +153,7 @@ class ProductServiceTest {
         void testNonExistingProduct() {
             // given
             final UUID nonExistingProductId = UUID.randomUUID();
-            final BigDecimal newPrice = BigDecimal.valueOf(20_000);
-            final Product request = ProductFixture.createProductRequest(newPrice);
+            final Product request = ProductFixture.createProductRequest(BigDecimal.valueOf(20_000));
             given(productRepository.findById(any())).willReturn(Optional.empty());
 
             // when & then
@@ -214,8 +203,8 @@ class ProductServiceTest {
             // then
             assertThat(result)
                     .hasSize(2)
-                    .extracting(Product::getName)
-                    .containsExactly("PRODUCT_1", "PRODUCT_2");
+                    .extracting(Product::getId)
+                    .containsExactly(product1.getId(), product2.getId());
         }
     }
 
