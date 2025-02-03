@@ -2,6 +2,7 @@ package kitchenpos.application;
 
 import kitchenpos.domain.MenuGroup;
 import kitchenpos.domain.MenuGroupRepository;
+import kitchenpos.fixture.MenuGroupFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
@@ -38,7 +38,7 @@ class MenuGroupServiceTest {
         void testRegisterGroupMenu() {
             // given
             final String name = "한마리메뉴";
-            final MenuGroup request = createMenuGroup(name);
+            final MenuGroup request = MenuGroupFixture.createMenuGroupRequest(name);
             given(menuGroupRepository.save(any())).willReturn(request);
 
             // when
@@ -54,7 +54,7 @@ class MenuGroupServiceTest {
         @DisplayName("메뉴 그룹은 이름을 필수로 가진다.")
         void testNullOrEmptyName(final String name) {
             // given
-            final MenuGroup request = createMenuGroup(name);
+            final MenuGroup request = MenuGroupFixture.createMenuGroupRequest(name);
 
             // when & then
             assertThatException()
@@ -71,8 +71,8 @@ class MenuGroupServiceTest {
         @DisplayName("등록된 모든 메뉴 그룹을 조회한다.")
         void testFindAllGroupMenus() {
             // given
-            final MenuGroup menuGroup1 = createMenuGroup("MENU_GROUP_NAME_1");
-            final MenuGroup menuGroup2 = createMenuGroup("MENU_GROUP_NAME_2");
+            final MenuGroup menuGroup1 = MenuGroupFixture.createMenuGroup("한마리메뉴");
+            final MenuGroup menuGroup2 = MenuGroupFixture.createMenuGroup("반반메뉴");
             given(menuGroupRepository.findAll()).willReturn(List.of(menuGroup1, menuGroup2));
 
             // when
@@ -84,13 +84,6 @@ class MenuGroupServiceTest {
                     .extracting(MenuGroup::getName)
                     .containsExactly(menuGroup1.getName(), menuGroup2.getName());
         }
-    }
-
-    private MenuGroup createMenuGroup(final String name) {
-        final MenuGroup menuGroup = new MenuGroup();
-        menuGroup.setId(UUID.randomUUID());
-        menuGroup.setName(name);
-        return menuGroup;
     }
 
 }

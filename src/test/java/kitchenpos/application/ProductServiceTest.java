@@ -3,6 +3,7 @@ package kitchenpos.application;
 import kitchenpos.domain.MenuRepository;
 import kitchenpos.domain.Product;
 import kitchenpos.domain.ProductRepository;
+import kitchenpos.fixture.ProductFixture;
 import kitchenpos.infra.PurgomalumClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -53,7 +54,7 @@ class ProductServiceTest {
             // given
             final String name = "후라이드";
             final BigDecimal price = BigDecimal.valueOf(16_000);
-            final Product request = createProductRequest(name, price);
+            final Product request = ProductFixture.createProductRequest(name, price);
             given(productRepository.save(any())).willReturn(request);
             given(purgomalumClient.containsProfanity(anyString())).willReturn(false);
 
@@ -74,7 +75,7 @@ class ProductServiceTest {
         void testEmptyName(final String name) {
             // given
             final BigDecimal price = BigDecimal.valueOf(16_000);
-            final Product request = createProductRequest(name, price);
+            final Product request = ProductFixture.createProductRequest(name, price);
 
             // when & then
             assertThatException()
@@ -88,7 +89,7 @@ class ProductServiceTest {
         void testPriceLessThanZero(final int price) {
             // given
             final String name = "후라이드";
-            final Product request = createProductRequest(name, BigDecimal.valueOf(price));
+            final Product request = ProductFixture.createProductRequest(name, BigDecimal.valueOf(price));
 
             // when & then
             assertThatException()
@@ -102,7 +103,7 @@ class ProductServiceTest {
             // given
             final String name = "부적절한 이름";
             final BigDecimal price = BigDecimal.valueOf(16_000);
-            final Product request = createProductRequest(name, price);
+            final Product request = ProductFixture.createProductRequest(name, price);
             given(purgomalumClient.containsProfanity(anyString())).willReturn(true);
 
             // when & then
@@ -123,8 +124,8 @@ class ProductServiceTest {
             final String name = "후라이드";
             final BigDecimal price = BigDecimal.valueOf(16_000);
             final BigDecimal newPrice = BigDecimal.valueOf(20_000);
-            final Product product = createProduct(name, price);
-            final Product request = createProductRequest(newPrice);
+            final Product product = ProductFixture.createProduct(name, price);
+            final Product request = ProductFixture.createProductRequest(newPrice);
             given(productRepository.findById(any())).willReturn(Optional.of(product));
             given(menuRepository.findAllByProductId(any())).willReturn(List.of());
 
@@ -148,8 +149,8 @@ class ProductServiceTest {
             final String name = "후라이드";
             final BigDecimal price = BigDecimal.valueOf(16_000);
             final BigDecimal newPrice = BigDecimal.valueOf(amount);
-            final Product product = createProduct(name, price);
-            final Product request = createProductRequest(newPrice);
+            final Product product = ProductFixture.createProduct(name, price);
+            final Product request = ProductFixture.createProductRequest(newPrice);
 
             // when & then
             assertThatException()
@@ -163,7 +164,7 @@ class ProductServiceTest {
             // given
             final UUID nonExistingProductId = UUID.randomUUID();
             final BigDecimal newPrice = BigDecimal.valueOf(20_000);
-            final Product request = createProductRequest(newPrice);
+            final Product request = ProductFixture.createProductRequest(newPrice);
             given(productRepository.findById(any())).willReturn(Optional.empty());
 
             // when & then
@@ -189,8 +190,8 @@ class ProductServiceTest {
         @DisplayName("등록된 모든 상품의 목록을 조회한다.")
         void findAllProductsSuccess() {
             // given
-            final Product product1 = createProduct("PRODUCT_1", BigDecimal.valueOf(1000));
-            final Product product2 = createProduct("PRODUCT_2", BigDecimal.valueOf(2000));
+            final Product product1 = ProductFixture.createProduct("PRODUCT_1", BigDecimal.valueOf(1000));
+            final Product product2 = ProductFixture.createProduct("PRODUCT_2", BigDecimal.valueOf(2000));
             given(productRepository.findAll()).willReturn(List.of(product1, product2));
 
             // when
@@ -202,25 +203,6 @@ class ProductServiceTest {
                     .extracting(Product::getName)
                     .containsExactly("PRODUCT_1", "PRODUCT_2");
         }
-    }
-
-    private Product createProduct(final String name, final BigDecimal price) {
-        final Product product = new Product();
-        product.setId(UUID.randomUUID());
-        product.setName(name);
-        product.setPrice(price);
-        return product;
-    }
-
-    private Product createProductRequest(final String name, final BigDecimal price) {
-        final Product product = new Product();
-        product.setName(name);
-        product.setPrice(price);
-        return product;
-    }
-
-    private Product createProductRequest(final BigDecimal price) {
-        return createProductRequest("후라이드", price);
     }
 
 }
