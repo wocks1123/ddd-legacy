@@ -23,7 +23,7 @@ public class ProductFixture {
     }
 
     public static Product createProductRequest(final BigDecimal price) {
-        return createProductRequest("후라이드", price);
+        return createProductRequest(null, price);
     }
 
 }

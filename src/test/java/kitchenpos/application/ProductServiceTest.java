@@ -176,8 +176,22 @@ class ProductServiceTest {
         @Test
         @DisplayName("가격 변경 후 메뉴에 포함된 상품들의 가격 총합이 메뉴의 가격보다 크면 숨김 처리한다.")
         void testHideMenuIfPriceIsGreaterThanSum() {
-            // TODO 메뉴 구현후 테스트 작성
-            throw new IllegalStateException("테스트 미구현");
+            // given
+            final Product product = ProductFixture.createProduct("후라이드", BigDecimal.valueOf(16_000));
+            final MenuGroup menuGroup = MenuGroupFixture.createMenuGroup("한마리메뉴");
+            final MenuProduct menuProduct = MenuProductFixture.createMenuProduct(product, 1);
+            final Menu menu = MenuFixture.createMenu("후라이드치킨", BigDecimal.valueOf(17_000), menuGroup, List.of(menuProduct));
+            final BigDecimal newPrice = BigDecimal.valueOf(20_000);
+            final Product request = ProductFixture.createProductRequest(newPrice);
+            given(productRepository.findById(any())).willReturn(Optional.of(product));
+            given(menuRepository.findAllByProductId(any())).willReturn(List.of(menu));
+
+            // when
+            final Product result = productService.changePrice(product.getId(), request);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(menu.isDisplayed()).isFalse();
         }
 
     }
