@@ -12,4 +12,8 @@ public class MenuProductFixture {
         return menuProduct;
     }
 
+    public static MenuProduct createMenuProduct() {
+        return createMenuProduct(ProductFixture.createProduct(), 1);
+    }
+
 }

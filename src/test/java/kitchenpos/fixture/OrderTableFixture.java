@@ -15,6 +15,18 @@ public class OrderTableFixture {
         return orderTable;
     }
 
+    public static OrderTable createOccupiedTable() {
+        final OrderTable orderTable = createOrderTable("테이블1");
+        orderTable.setOccupied(true);
+        return orderTable;
+    }
+
+    public static OrderTable createUnOccupiedTable() {
+        final OrderTable orderTable = createOrderTable("테이블1");
+        orderTable.setOccupied(false);
+        return orderTable;
+    }
+
     public static OrderTable createOrderTableRequest(final int numberOfGuests) {
         final OrderTable orderTable = new OrderTable();
         orderTable.setNumberOfGuests(numberOfGuests);

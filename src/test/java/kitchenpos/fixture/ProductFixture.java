@@ -15,6 +15,10 @@ public class ProductFixture {
         return product;
     }
 
+    public static Product createProduct() {
+        return createProduct("후라이드", BigDecimal.valueOf(16_000));
+    }
+
     public static Product createProductRequest(final String name, final BigDecimal price) {
         final Product product = new Product();
         product.setName(name);

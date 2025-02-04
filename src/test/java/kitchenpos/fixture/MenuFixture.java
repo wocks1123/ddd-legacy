@@ -20,6 +20,25 @@ public class MenuFixture {
         return menu;
     }
 
+    public static Menu createMenu() {
+        final MenuGroup menuGroup = MenuGroupFixture.createMenuGroup("한마리메뉴");
+        final MenuProduct menuProduct = MenuProductFixture.createMenuProduct();
+        Menu menu = createMenu("후라이드치킨", BigDecimal.valueOf(16_000), menuGroup, List.of(menuProduct));
+        return menu;
+    }
+
+    public static Menu createDisplayedMenu() {
+        Menu menu = createMenu();
+        menu.setDisplayed(true);
+        return menu;
+    }
+
+    public static Menu createHiddenMenu() {
+        Menu menu = createMenu();
+        menu.setDisplayed(false);
+        return menu;
+    }
+
     public static Menu createMenuRequest(final String name, final BigDecimal price, final MenuGroup menuGroup, final List<MenuProduct> menuProducts) {
         Menu menu = new Menu();
         menu.setName(name);
